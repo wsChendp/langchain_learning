@@ -18,7 +18,6 @@ os.environ["LANGCHAIN_API_KEY"] = 'lsv2_pt_6514d10c051f4a8ca6df0f95253c42f6_2b64
 # 调用大语言模型
 # 创建模型
 model = ChatOpenAI(model='gpt-4-turbo')
-
 # 2、准备prompt
 msg = [
     SystemMessage(content='请将以下的内容翻译成意大利语'),
