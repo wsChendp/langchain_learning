@@ -49,8 +49,8 @@ documents = [
 
 # 实例化一个向量数空间（使用 HuggingFaceEmbeddings，避免 modelscope 依赖冲突）
 # embedding = HuggingFaceEmbeddings(model_name="shibing624/text2vec-base-chinese")
-embedding = ModelScopeEmbeddings(model_id="iic/nlp_gte_sentence-embedding_chinese-base")
-vector_store = Chroma.from_documents(documents, embedding=embedding)
+embeddings = ModelScopeEmbeddings(model_id="iic/nlp_gte_sentence-embedding_chinese-base")
+vector_store = Chroma.from_documents(documents, embedding=embeddings)
 
 # 相似度的查询: 返回相似的分数， 分数越低相似度越高
 # print(vector_store.similarity_search_with_score('咖啡猫'))
