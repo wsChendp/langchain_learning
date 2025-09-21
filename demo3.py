@@ -2,23 +2,24 @@ import os
 
 from langchain_chroma import Chroma
 from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_community.embeddings import ModelScopeEmbeddings
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableWithMessageHistory, RunnableLambda, RunnablePassthrough
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langserve import add_routes
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo"
 os.environ["LANGCHAIN_API_KEY"] = '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'
 
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-4-turbo')
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature='0.6',
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 # 准备测试数据 ，假设我们提供的文档数据如下：
 documents = [
@@ -31,7 +32,7 @@ documents = [
         metadata={"source": "哺乳动物宠物文档"},
     ),
     Document(
-        page_content="金鱼是初学者的流行宠物，需要相对简单的护理。",
+        page_content="鱼是初学者的流行宠物，需要相对简单的护理。",
         metadata={"source": "鱼类宠物文档"},
     ),
     Document(
@@ -45,15 +46,16 @@ documents = [
 ]
 
 # 实例化一个向量数空间
-vector_store = Chroma.from_documents(documents, embedding=OpenAIEmbeddings())
+embeddings = ModelScopeEmbeddings(model_id="iic/nlp_gte_sentence-embedding_chinese-base")
+vector_store = Chroma.from_documents(documents, embedding=embeddings)
 
 # 相似度的查询: 返回相似的分数， 分数越低相似度越高
 # print(vector_store.similarity_search_with_score('咖啡猫'))
 
 # 检索器: bind(k=1) 返回相似度最高的第一个
-retriever = RunnableLambda(vector_store.similarity_search).bind(k=1)
+retriever = RunnableLambda(vector_store.similarity_search).bind(k=2)
 
-# print(retriever.batch(['咖啡猫', '鲨鱼']))
+print(retriever.batch(['保加利亚犬', '金鱼']))
 
 
 # 提示模板

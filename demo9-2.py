@@ -1,24 +1,24 @@
 import os
 
+from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import PromptTemplate, FewShotPromptTemplate
 from langchain_experimental.synthetic_data import create_data_generation_chain
 from langchain_experimental.tabular_synthetic_data.openai import create_openai_data_generator
 from langchain_experimental.tabular_synthetic_data.prompts import SYNTHETIC_FEW_SHOT_PREFIX, SYNTHETIC_FEW_SHOT_SUFFIX
-from langchain_openai import ChatOpenAI
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo"
 os.environ["LANGCHAIN_API_KEY"] = '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'
 # os.environ["TAVILY_API_KEY"] = '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'
 
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-3.5-turbo', temperature=0.8)
-
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature='0.6',
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 # 生成一些结构化的数据： 5个步骤
 # 1、定义数据模型
@@ -66,7 +66,7 @@ generator = create_openai_data_generator(
 result = generator.generate(
     subject='医疗账单',  # 指定生成数据的主题
     extra='医疗总费用呈现正态分布，最小的总费用为1000',  # 额外的一些指导信息
-    runs=10  # 指定生成数据的数量
+    runs=2  # 指定生成数据的数量
 )
 
 print(result)

@@ -3,24 +3,25 @@ import os
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_core.runnables import RunnableWithMessageHistory, RunnableConfig
 from langchain_openai import ChatOpenAI
 from langserve import add_routes
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo"
 os.environ["LANGCHAIN_API_KEY"] = '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'
 
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-4-turbo')
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature=0.6,  # 修正为数字类型
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 # 定义提示模板
 prompt_template = ChatPromptTemplate.from_messages([
-    ('system', '你是一个乐于助人的助手。用{language}尽你所能回答所有问题。'),
+    ('system', '你是一个有记忆的AI助手。你必须仔细阅读对话历史，记住用户提供的所有信息。用{language}回答问题。'),
     MessagesPlaceholder(variable_name='my_msg')
 ])
 
@@ -44,7 +45,8 @@ do_message = RunnableWithMessageHistory(
     input_messages_key='my_msg'  # 每次聊天时候发送msg的key
 )
 
-config = {'configurable': {'session_id': 'zs1234'}}  # 给当前会话定义一个sessionId
+config = RunnableConfig(configurable={'session_id': 'zs1234'})  # 给当前会话定义一个sessionId
+
 
 # 第一轮
 resp1 = do_message.invoke(
@@ -60,7 +62,7 @@ print(resp1.content)
 # 第二轮
 resp2 = do_message.invoke(
     {
-        'my_msg': [HumanMessage(content='请问：我的名字是什么？')],
+        'my_msg': [HumanMessage(content='请问：我和你上轮对话时候，我的名字是什么？')],
         'language': '中文'
     },
     config=config
@@ -69,8 +71,8 @@ resp2 = do_message.invoke(
 print(resp2.content)
 
 # 第3轮： 返回的数据是流式的
-config = {'configurable': {'session_id': 'lis2323'}}  # 给当前会话定义一个sessionId
-for resp in do_message.stream({'my_msg': [HumanMessage(content='请给我讲一个笑话？')], 'language': 'English'},
+config = RunnableConfig(configurable={'session_id': '123'})  # 给当前会话定义一个sessionId
+for resp in do_message.stream({'my_msg': [HumanMessage(content='请给我讲一个的笑话？')], 'language': '中文'},
                               config=config):
     # 每一次resp都是一个token
     print(resp.content, end='-')

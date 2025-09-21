@@ -5,23 +5,25 @@ from langchain.chains.history_aware_retriever import create_history_aware_retrie
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.embeddings import ModelScopeEmbeddings, BaichuanTextEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo"
 os.environ["LANGCHAIN_API_KEY"] = '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'
 # os.environ["TAVILY_API_KEY"] = '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'
-
+os.environ['BAICHUAN_API_KEY'] = 'sk-c3cb1ff363cd14e257a673bc3d9e0d16'
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-4-turbo')
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature='0.6',
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 # 1、加载数据: 一篇博客内容数据
 loader = WebBaseLoader(
@@ -43,7 +45,9 @@ splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = splitter.split_documents(docs)
 
 # 2、存储
-vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
+# embeddings = ModelScopeEmbeddings(model_id="iic/nlp_gte_sentence-embedding_chinese-base")
+embeddings = BaichuanTextEmbeddings()
+vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
 
 # 3、检索器
 retriever = vectorstore.as_retriever()
@@ -61,7 +65,7 @@ don't know. Use three sentences maximum and keep the answer concise.\n
 prompt = ChatPromptTemplate.from_messages(  # 提问和回答的 历史记录  模板
     [
         ("system", system_prompt),
-        MessagesPlaceholder("chat_history"),  #
+        # MessagesPlaceholder("chat_history"),
         ("human", "{input}"),
     ]
 )
@@ -69,12 +73,13 @@ prompt = ChatPromptTemplate.from_messages(  # 提问和回答的 历史记录  �
 # 得到chain
 chain1 = create_stuff_documents_chain(model, prompt)
 
-# chain2 = create_retrieval_chain(retriever, chain1)
+chain2 = create_retrieval_chain(retriever, chain1)
 
-# resp = chain2.invoke({'input': "What is Task Decomposition?"})
-#
-# print(resp['answer'])
+resp = chain2.invoke({'input': "What is Task Decomposition?"})
 
+print("=" * 50)
+print(resp['answer'])
+print("=" * 50)
 '''
 注意：
 一般情况下，我们构建的链（chain）直接使用输入问答记录来关联上下文。但在此案例中，查询检索器也需要对话上下文才能被理解。

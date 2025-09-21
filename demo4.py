@@ -4,19 +4,17 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langgraph.prebuilt import chat_agent_executor
-from langserve import add_routes
 
-os.environ['http_proxy'] = '127.0.0.1:7890'
-os.environ['https_proxy'] = '127.0.0.1:7890'
-
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo"
-os.environ["LANGCHAIN_API_KEY"] = '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'
 os.environ["TAVILY_API_KEY"] = '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'
 
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-4-turbo')
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature='0.6',
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 # 没有任何代理的情况下
 # result = model.invoke([HumanMessage(content='北京天气怎么样？')])

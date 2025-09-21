@@ -16,7 +16,12 @@ os.environ["LANGCHAIN_API_KEY"] = 'lsv2_pt_5a857c6236c44475a25aeff211493cc2_3943
 
 # 聊天机器人案例
 # 创建模型
-model = ChatOpenAI(model='gpt-4-turbo')
+model = ChatOpenAI(
+    model='glm-4-0520',
+    temperature='0.6',
+    api_key='06ca1c42545b44b2a3bb85531c7024a8.bDEKFcPHfhhYvm1Q',
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+)
 
 
 # pydantic: 处理数据，验证数据， 定义数据的格式， 虚拟化和反虚拟化，类型转换等等。
